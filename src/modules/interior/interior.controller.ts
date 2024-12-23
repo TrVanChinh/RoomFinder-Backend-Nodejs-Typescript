@@ -25,5 +25,15 @@ export default class InteriorController {
       next(error);
     }
   };
+
+  public updateInterior = async (req: Request, res: Response, next: NextFunction) => { 
+    try {
+      const data: IInterior = req.body
+      const result = await this.InteriorService.updateInterior(data)
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 

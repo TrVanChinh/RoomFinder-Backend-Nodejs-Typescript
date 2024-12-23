@@ -1,6 +1,10 @@
 import { sequelize } from '../../config/connectDB';
 import { Sequelize, DataTypes, Model, Optional } from 'sequelize';
 import IRoom from './room.interface';
+import User from '../users/users.model';
+import Address from '../address/address.model';
+import RoomType from '../room_type/room_type.model';
+import Interior from '../interior/interior.model';
 
 interface RoomCreationAttributes extends Optional<IRoom, 'maPhong'> {}
 
@@ -18,6 +22,7 @@ class Room extends Model<IRoom, RoomCreationAttributes> implements IRoom {
   public giaNuoc!: number;
   public dienTich!: string;
   public phongChungChu!: boolean;
+  public nhaBep!: boolean;
   public gacXep!: boolean;
   public soLuongPhongNgu!: number;
   public soTang!: number;
@@ -26,8 +31,8 @@ class Room extends Model<IRoom, RoomCreationAttributes> implements IRoom {
 
 
   // Timestamps
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // public readonly createdAt!: Date;
+  // public readonly updatedAt!: Date;
 }
 
 Room.init(
@@ -82,10 +87,15 @@ Room.init(
         type: DataTypes.BOOLEAN,
         allowNull: false,
       },
+      nhaBep: { 
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+      },
       gacXep: { 
         type: DataTypes.BOOLEAN,
         allowNull: false,
       },
+     
       soLuongPhongNgu: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -108,8 +118,10 @@ Room.init(
       sequelize, // Đối tượng kết nối
       tableName: 'Phong',
       modelName: 'Phong',
-      timestamps: true,
+      timestamps: false,
     }
   );
+
+
   
   export default Room;

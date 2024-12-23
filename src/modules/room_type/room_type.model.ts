@@ -1,6 +1,7 @@
 import { sequelize } from '../../config/connectDB';
 import { Sequelize, DataTypes, Model, Optional } from 'sequelize';
 import  IRoomType  from './room_type.interface'
+import Room from '../room/room.model';
 
 interface RoomTypeCreationAttributes extends Optional<IRoomType, 'maLoaiPhong'> {}
 

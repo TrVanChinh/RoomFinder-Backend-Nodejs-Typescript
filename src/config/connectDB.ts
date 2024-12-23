@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import * as dotenv from 'dotenv';
-
+import defineAssociations from '../associations';
 dotenv.config();
 
 // Khởi tạo kết nối Sequelize
@@ -11,7 +11,7 @@ const sequelize = new Sequelize({
     password: process.env.DB_PASSWORD,
     port: Number(process.env.DB_PORT) || 5432,
     dialect: 'postgres',
-});
+}); 
 
 const connection = async () => {
     try {

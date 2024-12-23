@@ -10,8 +10,8 @@ class MediaCategory extends Model<IMediaCategory, MediaCategoryCreationAttribute
   public tenDanhMuc!: string;
 
   // Timestamps
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // public readonly createdAt!: Date;
+  // public readonly updatedAt!: Date;
 }
 
 // Định nghĩa model
@@ -32,7 +32,7 @@ MediaCategory.init(
     sequelize, // Đối tượng kết nối Sequelize
     tableName: 'DanhMucHinhAnh', // Tên bảng trong database
     modelName: 'DanhMucHinhAnh',
-    timestamps: true, // Tự động thêm createdAt và updatedAt
+    timestamps: false, // Tự động thêm createdAt và updatedAt
   }
 );
 

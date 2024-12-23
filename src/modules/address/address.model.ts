@@ -1,6 +1,7 @@
 import { sequelize } from '../../config/connectDB';
 import {DataTypes, Model, Optional } from 'sequelize';
 import IAddress from './address.interface';
+import Room from '../room/room.model';
 
 interface AddressCreationAttributes extends Optional<IAddress, 'maDiaChi'> {}
 
@@ -11,8 +12,8 @@ class Address extends Model<IAddress, AddressCreationAttributes> implements IAdd
   public phuongXa!: string;
   public quanHuyen!: string;
   public tinhThanh!: string;
-  public kinhDo!: number;
-  public viDo!: number;
+  public kinhDo!: number | null;
+  public viDo!: number| null;
   // Timestamps
   // public readonly createdAt!: Date;
   // public readonly updatedAt!: Date;
@@ -45,11 +46,11 @@ Address.init(
     },
     kinhDo: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
     },
     viDo: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {

@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import RoomService from './room.service';
 import { console } from 'inspector';
 import { uploadToCloudinary } from '../../config/cloudinary';
-// import { OTPData } from './users.interface';
+import  IRoom  from './room.interface';
 
 export default class AddressController {
   private RoomService = new RoomService();
@@ -79,5 +79,79 @@ export default class AddressController {
       next(error);
     }
   };
+
+  public addRoom = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data: IRoom = req.body
+      const result = await this.RoomService.addRoom(data)
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getRoom = async (req: Request, res: Response, next: NextFunction) => { 
+    try {
+      const room = await this.RoomService.getRoomInfo(req.params.id);
+      res.status(200).json(room);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public getRoomOfUser = async (req: Request, res: Response, next: NextFunction) => { 
+    try {
+      const room = await this.RoomService.getRoomOfUser(req.params.id);
+      res.status(200).json(room);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public getRoomOfDistrict = async (req: Request, res: Response, next: NextFunction) => { 
+    try {
+      const district = req.query.district as string;
+      const room = await this.RoomService.getRoomOfDistrict(district);
+      res.status(200).json(room);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public deleteRoom = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const roomId: string = req.params.id;
+      await this.RoomService.deleteRoom(roomId);
+      res.status(200).json({ message: 'Phòng trọ đã được xóa thành công' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public updateRoomStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const  maPhong  = req.params.id; 
+        const trangThaiPhong  = req.body.trangThaiPhong; 
+        await this.RoomService.updateRoomStatus(maPhong, trangThaiPhong);
+        res.status(200).json({
+            message: 'Cập nhật trạng thái phòng thành công.',
+        });
+    } catch (error) {
+        next(error);
+    }
+  };
+
+  public updateBasicRoomInfo = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const roomData: IRoom  = req.body; 
+        await this.RoomService.updateBasicRoomInfo(roomData);
+        res.status(200).json({
+            message: 'Cập nhật thông tin phòng thành công.',
+        });
+    } catch (error) {
+        next(error);
+    }
+  };
+
 }
 

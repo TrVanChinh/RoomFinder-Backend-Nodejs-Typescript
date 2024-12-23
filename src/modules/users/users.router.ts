@@ -37,11 +37,9 @@ export default class UsersRoute implements Route {
 
     this.router.get(this.path, this.usersController.getAll);
 
-
-
     this.router.get(this.path + '/paging/:page', this.usersController.getAllPaging);
+    
     this.router.get(this.path + '/role/paging/:page', this.usersController.getAllPaginationByRole);
-
 
     this.router.delete(this.path + '/:id', this.usersController.deleteUser);
     
@@ -51,6 +49,22 @@ export default class UsersRoute implements Route {
       { name: 'matTruocCCCD', maxCount: 1 },
       { name: 'matSauCCCD', maxCount: 1 },
     ]), this.usersController.uploadIDImages);   
+
+    this.router.put(this.path  + '/update/user', this.usersController.userUpdateByUser);
+    this.router.put(this.path  + '/updatePassword/:id', this.usersController.updatePassword);
+
+
+
+
+
+
+
+
+
+
+
+
+
     // this.router.post(this.path, validationMiddleware(RegisterDto, true), this.usersController.register);
     // this.router.put(
     //   this.path + '/:id',

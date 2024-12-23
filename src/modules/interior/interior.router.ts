@@ -23,6 +23,8 @@ export default class InteriorRoute implements Route {
       this.path + '/addNew',
       this.InteriorController.addInterior);
 
-
+    this.router.put(
+      this.path + '/update',
+      this.InteriorController.updateInterior);
   }
 }

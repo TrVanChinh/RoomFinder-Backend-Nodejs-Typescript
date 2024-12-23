@@ -3,4 +3,5 @@ export default interface IDeposit {
     maPhong: number;
     phiDatCoc: number;
     thoiHanDatCoc: number;
+    donViThoiGian: string;
   }

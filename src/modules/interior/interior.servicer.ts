@@ -28,6 +28,7 @@ class InteriorService {
                 giuong: data.giuong,
                 banGhe: data.banGhe,
                 sofa: data.sofa,
+                wifi: data.wifi,
                 chanGaGoi: data.chanGaGoi,
                 tuLanh: data.tuLanh,
                 doDungBep: data.doDungBep,
@@ -44,6 +45,42 @@ class InteriorService {
         }
         
       }
+
+      public async updateInterior(data: IInterior): Promise<IInterior> {
+        if (!data) {
+            throw new HttpException(404, 'Không có dữ liệu được gửi đến.');
+        }
+    
+        try {
+            const interior = await Interior.findByPk(data.maNoiThat);
+    
+            if (!interior) {
+                throw new HttpException(404, 'Không tìm thấy dữ liệu nội thất.');
+            }
+    
+            await interior.update({
+                dieuHoa: data.dieuHoa,
+                wifi: data.wifi,
+                nongLanh: data.nongLanh,
+                giuong: data.giuong,
+                banGhe: data.banGhe,
+                sofa: data.sofa,
+                chanGaGoi: data.chanGaGoi,
+                tuLanh: data.tuLanh,
+                doDungBep: data.doDungBep,
+                tuQuanAo: data.tuQuanAo,
+            });
+    
+            return interior;
+        } catch (error) {
+            console.log(error);
+            if (error instanceof HttpException) {
+                throw error;
+            }
+            throw new HttpException(500, 'Lỗi update dữ liệu bảng nội thất.');
+        }
+    }
+    
     
 }
 

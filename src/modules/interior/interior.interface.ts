@@ -1,6 +1,7 @@
 export interface IInterior {
     maNoiThat: number;
     dieuHoa: boolean;
+    wifi: boolean;
     nongLanh: boolean;
     giuong: boolean;
     banGhe: boolean;

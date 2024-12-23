@@ -84,12 +84,6 @@ class UserService {
       }
 
       const hashedPassword = await bcrypt.hash(model.matKhau, 10);
-
-      const avatar = gravatar.url(model.email!, {
-        size: '200',
-        rating: 'g',
-        default: 'mm',
-      });
       
       const user = await User.create({
         tenNguoiDung: model.tenNguoiDung,     
@@ -98,8 +92,8 @@ class UserService {
         gioiTinh: null, 
         queQuan: null, 
         sdt: null, 
-        diaChi: null, 
-        hinhDaiDien: avatar, 
+        maDiaChi: null, 
+        hinhDaiDien: "https://www.gravatar.com/avatar/c4c3dab67de42ddbbfeec8c32284a1d6?size=200&rating=g&default=mm", 
         ngaySinh: null, 
         soCCCD: null, 
         matTruocCCCD: null, 
@@ -137,11 +131,6 @@ class UserService {
         if (checkEmailExist) {
           throw new HttpException(400, 'Email đã tồn tại.');
         }
-        const avatar = gravatar.url(model.email!, {
-          size: '200',
-          rating: 'g',
-          default: 'mm',
-        });
         const hashedPassword = await bcrypt.hash(model.matKhau, 10);
         // Tạo người dùng mới bằng Sequelize
         const user = await User.create({
@@ -151,8 +140,8 @@ class UserService {
           gioiTinh: null, 
           queQuan: null, 
           sdt: model.sdt, 
-          diaChi: null, 
-          hinhDaiDien: avatar, 
+          maDiaChi: null, 
+          hinhDaiDien: "https://www.gravatar.com/avatar/c4c3dab67de42ddbbfeec8c32284a1d6?size=200&rating=g&default=mm", 
           ngaySinh: null, 
           soCCCD: model.soCCCD, 
           matTruocCCCD: model.matTruocCCCD, 
@@ -336,15 +325,42 @@ class UserService {
       //   return user;
       // }
 
+      public async updatePassword(userId: string, data: { oldPassword: string, newPassword: string}) {
+        try {
+          const user = await User.findByPk(userId)
+          if (!user) {
+            throw new HttpException(400, 'Người dùng này không tồn tại.');
+          }
+          if (data.oldPassword.length < 7 || data.newPassword.length < 7) {
+            throw new HttpException(400, 'Mật khẩu không hợp lệ.');
+          }
+          const validPassword = await bcrypt.compare(data.oldPassword, user.matKhau);
+          if (!validPassword) {
+            throw new HttpException(400, 'Mật khẩu không chính xác.');
+          }
+          const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+          user.matKhau = hashedPassword;
+          await user.save();
+
+        } catch (error) {
+          console.log(error)
+          if (error instanceof HttpException) {
+            throw error;
+          }
+          throw new HttpException(500, 'Lỗi cập nhật mật khẩu');
+        }
+      }
+        
+
       public async userUpdateByAdmin(userId: string, model: userUpdateByAdmin): Promise<User> {
         if (isEmptyObject(model)) {
-          throw new HttpException(400, 'Model is empty');
+          throw new HttpException(400, 'Dữ liệu rỗng');
         }
     
         // Tìm người dùng theo userId
         const user = await User.findByPk(userId);
         if (!user) {
-          throw new HttpException(400, 'User does not exist');
+          throw new HttpException(400, 'Người dùng này không tồn tại.');
         }
     
         // Kiểm tra email đã được dùng bởi người dùng khác chưa
@@ -375,6 +391,58 @@ class UserService {
         return user;
       }
 
+      public async updateUserByUser(data: { maNguoiDung: number, tenNguoiDung: string, sdt: string, ngaySinh?: Date, hinhDaiDien:string }) {
+        if (!data) {
+            throw new HttpException(400, 'Dữ liệu người dùng không hợp lệ.');
+        }
+        try {
+            const user = await User.findByPk(data.maNguoiDung); 
+ 
+            if (!user) {
+                throw new HttpException(404, 'Không tìm thấy người dùng.');
+            }
+
+            if(data.sdt.length!=10)
+            {
+                throw new HttpException(400, 'Số điện thoại không hợp lệ.');
+            }
+
+            if(user.sdt !== data.sdt) {
+              const checkSDTExist = await User.findOne({
+                where: {
+                  sdt: data.sdt,
+                },
+              });
+              if (checkSDTExist) {
+                throw new HttpException(400, 'Số điện thoại đã được sử dụng.');
+              }
+            }
+      
+            if (data.hinhDaiDien) {
+                user.hinhDaiDien = data.hinhDaiDien;
+            }
+            if (data.tenNguoiDung) {
+                user.tenNguoiDung = data.tenNguoiDung;
+            }
+            if (data.sdt) {
+                user.sdt = data.sdt;
+            }
+            if (data.ngaySinh) {
+                user.ngaySinh = data.ngaySinh;
+            }
+            user.ngayCapNhat = new Date();
+
+            await user.save();
+            return user;
+        } catch (error) {
+            console.log(error);
+            if (error instanceof HttpException) {
+                throw error;
+            }
+            throw new HttpException(500, 'Lỗi cập nhật người dùng.');
+        }
+    }
+    
       public async addUserByAdmin( model: userUpdateByAdmin): Promise<User> {
     
         if (isEmptyObject(model)) {
@@ -399,7 +467,7 @@ class UserService {
           gioiTinh: model.gioiTinh, 
           queQuan: null, 
           sdt: model.sdt, 
-          diaChi: null, 
+          maDiaChi: null, 
           hinhDaiDien: null, 
           ngaySinh: model.ngaySinh, 
           soCCCD: model.soCCCD, 

@@ -1,6 +1,7 @@
 import { sequelize } from '../../config/connectDB';
 import { Sequelize, DataTypes, Model, Optional } from 'sequelize';
 import {IInterior} from './interior.interface';
+import Room from '../room/room.model';
 
 interface IInteriorCreationAttributes extends Optional<IInterior, 'maNoiThat'> {}
 
@@ -10,6 +11,7 @@ class Interior
 {
   public maNoiThat!: number;
   public dieuHoa!: boolean;
+  public wifi!: boolean;
   public nongLanh!: boolean;
   public giuong!: boolean;
   public banGhe!: boolean;
@@ -37,6 +39,10 @@ Interior.init(
       allowNull: false,
     },
     nongLanh: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    wifi: { 
       type: DataTypes.BOOLEAN,
       allowNull: false,
     },
@@ -76,5 +82,4 @@ Interior.init(
     timestamps: false, // Nếu cần cột createdAt và updatedAt
   }
 );
-
 export default Interior;

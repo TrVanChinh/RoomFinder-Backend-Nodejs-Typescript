@@ -1,15 +1,15 @@
 // import RegisterDto from './dtos/register.dtos';
 import { Route } from '../../core/interfaces';
 import { Router } from 'express';
-import AddressController from './address.controller';
+import DepositController from './deposit.controller';
 import { authMiddleware } from '../../core/middlewave';
 import multer from "multer";
 // import validationMiddleware from '@core/middleware/validation.middleware';
 
-export default class AddressRoute implements Route {
-  public path = '/api/address';
+export default class DepositsRoute implements Route {
+  public path = '/api/deposit';
   public router = Router();
-  public AddressController = new AddressController();
+  public DepositController = new DepositController();
   public upload = multer({ dest: '../../uploads/' });
 
   constructor() {
@@ -19,23 +19,29 @@ export default class AddressRoute implements Route {
   private initializeRoutes() {
 
     this.router.get(
-      this.path,
-      this.AddressController.getRoomType);
+      this.path ,
+      this.DepositController.getDeposit);
 
     this.router.get(
-      this.path + '/:id',
-      this.AddressController.getRoomType);
+      this.path + '/room/:id',
+      this.DepositController.getDepositByRoom);
+  
 
     this.router.post(
       this.path + '/addNew',
-      this.AddressController.addAddress);
+      this.DepositController.addDeposit);
+
+    this.router.post(
+      this.path + '/addANewOne',
+      this.DepositController.addOneDeposit);
 
     this.router.put(
-      this.path + '/update',
-      this.AddressController.updateAddress);
-
+      this.path + '/update/:id',
+      this.DepositController.updateDeposit);
+    
     this.router.delete(
       this.path + '/delete/:id',
-      this.AddressController.deleteAddress);
+      this.DepositController.deleteDeposit);
+
   }
 }

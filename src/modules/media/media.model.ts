@@ -13,8 +13,8 @@ class Media extends Model<IMedia, MediaCreationAttributes> implements IMedia {
   public duongDan!: string;
 
   // Timestamps
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // public readonly createdAt!: Date;
+  // public readonly updatedAt!: Date;
 }
 
 // Khởi tạo model với Sequelize
@@ -47,7 +47,7 @@ Media.init(
     sequelize, // Đối tượng kết nối
     tableName: 'HinhAnh',
     modelName: 'HinhAnh',
-    timestamps: true,
+    timestamps: false,
   }
 );
 

@@ -8,6 +8,9 @@ import RoleRoute from "./modules/role/role.route";
 import RoomRoute from "./modules/room/room.router";
 import AddressRoute from "./modules/address/address.router";
 import InteriorRoute from "./modules/interior/interior.router";
+import DepositsRoute from "./modules/deposit/deposit.router";
+import MediaRouter from "./modules/media/media.router";
+import defineAssociations from "./associations";
 const routes = [
     new IndexRoute(), 
     new UsersRoute(),
@@ -16,8 +19,11 @@ const routes = [
     new RoomRoute(),
     new AddressRoute(),
     new InteriorRoute(),
+    new DepositsRoute(),
+    new MediaRouter()
 ]
 const app = new App(routes)
 connection()
+defineAssociations()
 app.listen()
 

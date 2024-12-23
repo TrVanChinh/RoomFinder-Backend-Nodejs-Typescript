@@ -6,7 +6,7 @@ export default interface IUser {
     email: string;
     matKhau: string;
     sdt: string | null;
-    diaChi: string | null;
+    maDiaChi: number | null;
     hinhDaiDien: string | null;
     ngaySinh: Date | null;
     soCCCD: string | null;

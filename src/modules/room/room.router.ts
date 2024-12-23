@@ -32,15 +32,32 @@ export default class RoomRoute implements Route {
       this.path + '/type',
       this.RoomController.getRoomType);
 
-    // this.router.post(
-    //   this.path + '/register',
-    //   validationMiddleware(RegisterDto),
-    //   this.UsersController.register);
+    this.router.get(
+      this.path + '/:id',
+      this.RoomController.getRoom);
+    
+    this.router.get(
+      this.path + '/user/:id',
+      this.RoomController.getRoomOfUser);
+    
+    this.router.get(
+      this.path + '/address/district',
+      this.RoomController.getRoomOfDistrict);
 
-    // this.router.post(
-    //   this.path + '/login',
-    //   this.UsersController.login);
+    this.router.post(
+      this.path + '/addNew',
+      this.RoomController.addRoom);
 
+    this.router.delete(
+      this.path + '/delete/:id',
+      this.RoomController.deleteRoom);
+          
+    this.router.put(
+      this.path + '/updateStatus/:id',
+      this.RoomController.updateRoomStatus);
 
+    this.router.put(
+      this.path + '/updateBasicRoomInfo',
+      this.RoomController.updateBasicRoomInfo);
   }
 }

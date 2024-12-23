@@ -4,6 +4,6 @@ export default interface IAddress {
     phuongXa: string;
     quanHuyen: string;
     tinhThanh: string;
-    kinhDo: number;
-    viDo: number;
+    kinhDo: number | null;
+    viDo: number | null;
   }

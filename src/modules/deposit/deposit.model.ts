@@ -9,10 +9,11 @@ class Deposit extends Model<IDeposit, DepositCreationAttributes> implements IDep
   public maPhong!: number;
   public phiDatCoc!: number;
   public thoiHanDatCoc!: number;
+  public donViThoiGian!: string;
 
   // Timestamps
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // public readonly createdAt!: Date;
+  // public readonly updatedAt!: Date;
 }
 
 // Khởi tạo model với Sequelize
@@ -35,14 +36,17 @@ Deposit.init(
     thoiHanDatCoc: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      comment: 'Thời hạn đặt cọc tính theo số ngày',
+    },
+    donViThoiGian: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {
     sequelize,
     tableName: 'ChiPhiDatCoc',
     modelName: 'ChiPhiDatCoc',
-    timestamps: true,
+    timestamps: false,
   }
 );
 

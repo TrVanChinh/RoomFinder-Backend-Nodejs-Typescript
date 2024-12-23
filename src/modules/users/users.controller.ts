@@ -125,10 +125,31 @@ export default class UsersController {
     }
   };
 
+  public updatePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data: { oldPassword: string, newPassword: string} = req.body;
+      const userId: string = req.params.id
+      const user = await this.userService.updatePassword(userId, data);
+      res.status(200).json({message: "Cập nhật mật khẩu thành công."});
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public userUpdateByAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const model: userUpdateByAdmin = req.body;
       const user = await this.userService.userUpdateByAdmin(req.params.id, model);
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public userUpdateByUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data: { maNguoiDung: number, tenNguoiDung: string, sdt: string, ngaySinh?: Date, hinhDaiDien: string } = req.body;
+      const user = await this.userService.updateUserByUser(data);
       res.status(200).json(user);
     } catch (error) {
       next(error);

@@ -1,6 +1,7 @@
 import { sequelize } from '../../config/connectDB';
 import { Sequelize, DataTypes, Model, Optional } from 'sequelize';
 import IUser from './users.interface';
+import Room from '../room/room.model';
 
 interface UserCreationAttributes extends Optional<IUser, 'maNguoiDung'> {}
 
@@ -12,7 +13,7 @@ class User extends Model<IUser, UserCreationAttributes> implements IUser {
   public email!: string;
   public matKhau!: string;
   public sdt!: string | null;
-  public diaChi!: string | null;
+  public maDiaChi!: number | null;
   public hinhDaiDien!: string | null;
   public ngaySinh!: Date | null;
   public soCCCD!: string | null;
@@ -58,8 +59,8 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    diaChi: {
-      type: DataTypes.STRING,
+    maDiaChi: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     hinhDaiDien: {
