@@ -9,6 +9,12 @@ import userUpdateByAdmin from './dtos/userUpdateByAdmin.dtos';
 import { OTPData } from './users.interface';
 import RegisterRoomOwnerDto from './dtos/registerRoomOwner.dtos';
 
+import moment from'moment';
+import axios from 'axios';
+import CryptoJS from 'crypto-js'
+import qs from "qs";
+import { IReport } from '../report';
+
 interface MulterRequest extends Request {
   files: {
     maTruocCCCD?: Express.Multer.File[];
@@ -254,4 +260,108 @@ export default class UsersController {
       });
     }
   };
+
+  public payment = async (req: Request, res: Response): Promise<void> => { 
+    const { totalPrice } = req.body;
+    const config = {
+      app_id: "2553",
+      key1: "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
+      key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
+      endpoint: "https://sb-openapi.zalopay.vn/v2/create",
+    };
+  
+    const embed_data = { bankgroup: "ATM" };
+  
+    const items = [{}];
+    const transID = Math.floor(Math.random() * 1000000);
+    const order = {
+      app_id: config.app_id,
+      app_trans_id: `${moment().format("YYMMDD")}_${transID}`, // translation missing: vi.docs.shared.sample_code.comments.app_trans_id
+      app_user: "user123",
+      app_time: Date.now(), // miliseconds
+      item: JSON.stringify(items),
+      embed_data: JSON.stringify(embed_data),
+      amount: totalPrice,
+      description: `Đặt cọc phòng`,
+      bank_code: "",
+      mac:"",
+    };
+  
+    // appid|app_trans_id|appuser|amount|apptime|embeddata|item
+    const data =
+      config.app_id +
+      "|" +
+      order.app_trans_id +
+      "|" +
+      order.app_user +
+      "|" +
+      order.amount +
+      "|" +
+      order.app_time +
+      "|" +
+      order.embed_data +
+      "|" +
+      order.item;
+    order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
+  
+    axios
+      .post(config.endpoint, null, { params: order })
+      .then((response) => {
+        // console.log(response.data);
+        console.log(order.app_trans_id)
+        res.json({ order_url: response.data.order_url, transID: order.app_trans_id});
+      })
+      .catch((err) => console.log(err));
+  
+  }
+
+  public checkPayment = async (req: Request, res: Response): Promise<void> => { 
+    const {transID} = req.body;
+    const config = {
+      app_id: "2553",
+      key1: "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
+      key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
+      endpoint: "https://sb-openapi.zalopay.vn/v2/query",
+    };
+  
+    let postData = {
+      app_id: config.app_id,
+      app_trans_id: transID, // Input your app_trans_id
+      mac:"",
+    };
+  
+    let data = postData.app_id + "|" + postData.app_trans_id + "|" + config.key1; // appid|app_trans_id|key1
+    postData.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
+  
+    let postConfig = {
+      method: "post",
+      url: config.endpoint,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      data: qs.stringify(postData),
+    };
+  
+    axios(postConfig)
+      .then(function (response) {
+        // console.log(JSON.stringify(response.data));
+        res.json({ data: response.data });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  
+  }
+
+  public addReport = async (req: Request, res: Response,  next: NextFunction) => {
+    try {
+      const data: IReport = req.body;
+      const result = await this.userService.addReport(data.maNguoiDung, data.maPhong, data.noiDungBaoCao);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
+
+

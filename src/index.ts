@@ -11,6 +11,8 @@ import InteriorRoute from "./modules/interior/interior.router";
 import DepositsRoute from "./modules/deposit/deposit.router";
 import MediaRouter from "./modules/media/media.router";
 import defineAssociations from "./associations";
+import BillRoute from "./modules/bill/bill.route";
+import NotificationRoute from "./modules/notification/notification.router";
 const routes = [
     new IndexRoute(), 
     new UsersRoute(),
@@ -20,7 +22,9 @@ const routes = [
     new AddressRoute(),
     new InteriorRoute(),
     new DepositsRoute(),
-    new MediaRouter()
+    new MediaRouter(),
+    new BillRoute(),
+    new NotificationRoute(),
 ]
 const app = new App(routes)
 connection()

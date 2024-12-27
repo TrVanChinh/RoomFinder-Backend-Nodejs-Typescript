@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import RoomService from './room.service';
 import { console } from 'inspector';
 import { uploadToCloudinary } from '../../config/cloudinary';
-import  IRoom  from './room.interface';
+import  IRoom, { RoomSearchCriteria }  from './room.interface';
 
 export default class AddressController {
   private RoomService = new RoomService();
@@ -132,10 +132,9 @@ export default class AddressController {
     try {
         const  maPhong  = req.params.id; 
         const trangThaiPhong  = req.body.trangThaiPhong; 
-        await this.RoomService.updateRoomStatus(maPhong, trangThaiPhong);
-        res.status(200).json({
-            message: 'Cập nhật trạng thái phòng thành công.',
-        });
+        const data = await this.RoomService.updateRoomStatus(maPhong, trangThaiPhong);
+        res.status(200).json(data);
+
     } catch (error) {
         next(error);
     }
@@ -148,6 +147,16 @@ export default class AddressController {
         res.status(200).json({
             message: 'Cập nhật thông tin phòng thành công.',
         });
+    } catch (error) {
+        next(error);
+    }
+  };
+
+  public searchRooms = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const roomData: RoomSearchCriteria  = req.body; 
+        const data = await this.RoomService.searchRooms(roomData);
+        res.status(200).json(data);
     } catch (error) {
         next(error);
     }

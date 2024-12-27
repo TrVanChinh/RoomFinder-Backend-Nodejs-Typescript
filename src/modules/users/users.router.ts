@@ -52,6 +52,12 @@ export default class UsersRoute implements Route {
 
     this.router.put(this.path  + '/update/user', this.usersController.userUpdateByUser);
     this.router.put(this.path  + '/updatePassword/:id', this.usersController.updatePassword);
+    this.router.post(this.path  + '/payment/zalopay', this.usersController.payment);
+    this.router.post(this.path  + '/payment/checkPayment', this.usersController.checkPayment);
+    this.router.post(this.path  + '/report', this.usersController.addReport);
+
+
+
 
 
 

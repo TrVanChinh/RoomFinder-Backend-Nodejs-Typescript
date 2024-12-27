@@ -47,6 +47,10 @@ export default class RoomRoute implements Route {
     this.router.post(
       this.path + '/addNew',
       this.RoomController.addRoom);
+    
+    this.router.post(
+      this.path + '/chatbot/searchRooms',
+      this.RoomController.searchRooms);
 
     this.router.delete(
       this.path + '/delete/:id',

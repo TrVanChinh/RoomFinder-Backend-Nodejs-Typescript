@@ -15,6 +15,8 @@ import userUpdateByAdmin from './dtos/userUpdateByAdmin.dtos';
 import { OTPData } from './users.interface';
 import RegisterRoomOwnerDto from './dtos/registerRoomOwner.dtos';
 import { IsEmail, IsNotEmpty, validate } from 'class-validator';
+import { IReport } from '../report';
+import Report from '../report/report.model';
 const nodemailer = require('nodemailer')
 
 let transporter = nodemailer.createTransport({
@@ -601,6 +603,27 @@ class UserService {
       { where: { maNguoiDung: userId } }
     );
   };
+
+  public async addReport(userId: number, roomId: number, content: string): Promise<IReport> {
+    if (!userId || !roomId || !content) {
+        throw new HttpException(404, 'Thiếu dữ liệu báo cáo.');
+    }
+    try {
+        const report = await Report.create({
+            maNguoiDung: userId,
+            maPhong: roomId,
+            noiDungBaoCao: content,
+        });
+        return report;
+    } catch (error) {
+        console.error(error);
+        if (error instanceof HttpException) {
+            throw error;
+        }
+        throw new HttpException(500, 'Lỗi tạo báo cáo.');
+    }
+}
+
   
 
   
