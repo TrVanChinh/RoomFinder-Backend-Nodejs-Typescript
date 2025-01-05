@@ -1,4 +1,4 @@
-
+import http from "http";
 import App from "./app";
 import { IndexRoute } from "./modules/index";
 import connection from "./config/connectDB";
@@ -13,12 +13,20 @@ import MediaRouter from "./modules/media/media.router";
 import defineAssociations from "./associations";
 import BillRoute from "./modules/bill/bill.route";
 import NotificationRoute from "./modules/notification/notification.router";
+import cron from "./cron";
+import { Server } from "socket.io";
+import socketIo from 'socket.io';
+
+const httpServer = http.createServer();
+// const io = new Server(httpServer);
+const io = new socketIo.Server(httpServer);
+// cron(io);
 const routes = [
     new IndexRoute(), 
     new UsersRoute(),
     new AuthRoute(),
     new RoleRoute(),
-    new RoomRoute(),
+    new RoomRoute(io),
     new AddressRoute(),
     new InteriorRoute(),
     new DepositsRoute(),
@@ -26,7 +34,7 @@ const routes = [
     new BillRoute(),
     new NotificationRoute(),
 ]
-const app = new App(routes)
+const app = new App(routes, io);
 connection()
 defineAssociations()
 app.listen()

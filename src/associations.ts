@@ -10,7 +10,7 @@ import BiilType from './modules/bill_type/bill_type.model';
 import Bill from './modules/bill/bill.model';
 import Notification from './modules/notification/notification.model';
 import NotificationType from './modules/notification_type/notification_type.model';
-
+import SaveRoom from './modules/save_room/save_room.model';
 // Định nghĩa quan hệ giữa các model
 Room.belongsTo(User, { as: 'NguoiDung', foreignKey: 'maNguoiDung' });
 Room.belongsTo(Address, { as: 'DiaChi', foreignKey: 'maDiaChi' });
@@ -31,11 +31,16 @@ Notification.belongsTo(NotificationType, { as: 'LoaiThongBao', foreignKey:'maLoa
 Notification.belongsTo(Room, { as: 'Phong', foreignKey:'maPhong' });
 Notification.belongsTo(Bill, { as: 'HoaDon', foreignKey:'maHoaDon' });
 
+SaveRoom.belongsTo(Room, { as: 'Phong', foreignKey: 'maPhong' });
+SaveRoom.belongsTo(User, { as: 'NguoiDung', foreignKey: 'maNguoiDung' });
+
 // (Tùy chọn) Quan hệ ngược lại nếu cần
 User.hasMany(Room, { as: 'Phong', foreignKey: 'maNguoiDung' });
 User.hasMany(Bill, { as: 'HoaDon', foreignKey: 'maNguoiDung' });
 User.hasMany(Notification, { as: 'ThongBao', foreignKey: 'maNguoiDung' });
+User.hasMany(SaveRoom, { as: 'LuuPhong', foreignKey: 'maNguoiDung' });
 
+Room.hasMany(SaveRoom, { as: 'LuuPhong', foreignKey: 'maPhong' });
 Address.hasMany(Room, { as: 'Phong', foreignKey: 'maDiaChi' });
 RoomType.hasMany(Room, { as: 'Phong', foreignKey: 'maLoaiPhong' });
 Interior.hasMany(Room, { as: 'Phong', foreignKey: 'maNoiThat' });

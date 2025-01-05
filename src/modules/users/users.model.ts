@@ -19,7 +19,6 @@ class User extends Model<IUser, UserCreationAttributes> implements IUser {
   public soCCCD!: string | null;
   public matTruocCCCD!: string | null;
   public matSauCCCD!: string | null;
-  public maPX!: string | null;
   public maLTK!: number | null;
   public trangThaiDangKy!: string;
   public trangThaiTaiKhoan!: string | null;
@@ -80,10 +79,6 @@ User.init(
       allowNull: true,
     },
     matSauCCCD: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    maPX: {
       type: DataTypes.STRING,
       allowNull: true,
     },

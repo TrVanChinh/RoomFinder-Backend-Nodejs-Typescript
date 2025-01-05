@@ -21,8 +21,14 @@ import { IRoomType } from '../room_type';
 import { IAddress } from '../address';
 import IDeposit from '../deposit/deposit.interface';
 import { IUser } from '../users';
-class NotificationService { 
+import socketIo from 'socket.io';
 
+class NotificationService { 
+    // private io: socketIo.Server;
+
+    // constructor(io: socketIo.Server) {
+    //     this.io = io; // Nhận io từ App
+    // }
     public async getNotification(): Promise<INotification[]> {
         const address = await Notification.findAll(); 
         if (!address || address.length === 0) {
@@ -168,6 +174,9 @@ class NotificationService {
                 trangThai: data.trangThai,
                 thoiGian: thoiGianUTC7,
             }); 
+            // this.io.emit("new-notification", {
+            //     message: "A new notification has arrived!"
+            // });
                 return notification ;
         } catch (error) {
             console.log(error)

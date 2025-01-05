@@ -5,9 +5,15 @@ import RoomService from './room.service';
 import { console } from 'inspector';
 import { uploadToCloudinary } from '../../config/cloudinary';
 import  IRoom, { RoomSearchCriteria }  from './room.interface';
+import { Server } from "socket.io";
 
 export default class AddressController {
-  private RoomService = new RoomService();
+  private RoomService: RoomService;
+
+  constructor(io: Server) {
+    this.RoomService = new RoomService(io); 
+  }
+
 
   public uploadRoomImages = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -118,6 +124,29 @@ export default class AddressController {
     }
   }
 
+  public getAllRoomsPaging = async (req: Request, res: Response, next: NextFunction) => { 
+    try {
+      const page = Number(req.params.page);
+      const keyword = req.query.keyword || '';
+      const room = await this.RoomService.getAllRoomsPaging(keyword.toString(), page);
+      res.status(200).json(room);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public getAllRoomsByType = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const page = Number(req.params.page);
+      const keyword = Number(req.query.keyword) || 0;
+
+      const paginationResult = await this.RoomService.getAllRoomsByType(keyword, page);
+      res.status(200).json(paginationResult);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public deleteRoom = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const roomId: string = req.params.id;
@@ -152,10 +181,41 @@ export default class AddressController {
     }
   };
 
+  public saveRoom = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const roomId: number  = req.body.maPhong; 
+        const userId: number  = req.body.maNguoiDung; 
+        await this.RoomService.saveRoom(roomId, userId);
+        res.status(200).json({
+            message: 'Lưu phòng thành công.',
+        });
+    } catch (error) {
+        next(error);
+    }
+  };
+
   public searchRooms = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const roomData: RoomSearchCriteria  = req.body; 
         const data = await this.RoomService.searchRooms(roomData);
+        res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
+  };
+
+  public checkDate = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = await this.RoomService.checkDate();
+        res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
+  };
+
+  public checkAndNotifyExpiredBills = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = await this.RoomService.checkAndNotifyExpiredBills();
         res.status(200).json(data);
     } catch (error) {
         next(error);

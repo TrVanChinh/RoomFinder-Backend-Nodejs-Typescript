@@ -12,7 +12,6 @@ export default interface IUser {
     soCCCD: string | null;
     matTruocCCCD: string | null;
     matSauCCCD: string | null;
-    maPX: string | null;
     maLTK: number | null;
     trangThaiDangKy: string;
     trangThaiTaiKhoan: string | null;
