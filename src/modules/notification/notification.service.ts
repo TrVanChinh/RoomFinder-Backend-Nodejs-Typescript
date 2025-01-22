@@ -90,6 +90,8 @@ class NotificationService {
                 phongChungChu: roomData.phongChungChu,
                 gacXep: roomData.gacXep,
                 nhaBep: roomData.nhaBep,
+                nhaDeXe: roomData.nhaDeXe,
+                nhaVeSinh: roomData.nhaVeSinh,
                 soLuongPhongNgu: roomData.soLuongPhongNgu,
                 soTang: roomData.soTang,
                 soNguoiToiDa: roomData.soNguoiToiDa,

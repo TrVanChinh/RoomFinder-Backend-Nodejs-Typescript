@@ -27,8 +27,8 @@ SaveRoom.init(
   },
   {
     sequelize, // Đối tượng kết nối
-    tableName: 'LuuPhong',
-    modelName: 'LuuPhong',
+    tableName: 'PhongLuu',
+    modelName: 'PhongLuu',
     timestamps: false, // Sequelize sẽ tự động thêm `createdAt` và `updatedAt`
   }
 );

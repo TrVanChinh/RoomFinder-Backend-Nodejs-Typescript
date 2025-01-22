@@ -6,6 +6,7 @@ import { IPagination } from '../../core/interfaces';
 import { IsEmail, IsNotEmpty, validate } from 'class-validator';
 import IDeposit from './deposit.interface';
 import Deposit from './deposit.model';
+import Room from '../room/room.model';
 class DepositService { 
 
     public async getDeposit(): Promise<IDeposit[]> {
@@ -56,6 +57,19 @@ class DepositService {
         }
     
         try {
+            const room = await Room.findOne({
+                where: {
+                    maPhong: maPhong
+                }
+            })
+            // Cập nhật dữ liệu phí đặt cọc
+                        
+            if(room?.trangThaiPhong ==="Không duyệt")
+            {
+                room.trangThaiPhong = "Chờ duyệt";
+                await room.save();
+            }
+            
             const deposits = await Promise.all(
                 data.map(async (item) => {
                     return await Deposit.create({
@@ -66,6 +80,8 @@ class DepositService {
                     });
                 })
             );
+            
+            
               return deposits;
         } catch (error) {
             console.log(error)
@@ -88,10 +104,16 @@ class DepositService {
 
             if (!deposit) {
                 throw new HttpException(404, 'Không tìm thấy phí đặt cọc.');
-            }
+            } 
+            const room = await Room.findByPk(deposit.maPhong)
             // Cập nhật dữ liệu phí đặt cọc
+            
+            if(room?.trangThaiPhong ==="Không duyệt")
+            {
+                room.trangThaiPhong = "Chờ duyệt";
+                await room.save();
+            }
             await deposit.update(data);
-            console.log('Dữ liệu phí đặt cọc đã được cập nhật thành công.');
 
         } catch (error) {
             console.log(error)
@@ -114,6 +136,14 @@ class DepositService {
     
             if (!deposit) {
                 throw new HttpException(404, 'Không tìm thấy phí đặt cọc.');
+            }
+            const room = await Room.findByPk(deposit.maPhong)
+            // Cập nhật dữ liệu phí đặt cọc
+            
+            if(room?.trangThaiPhong ==="Không duyệt")
+            {
+                room.trangThaiPhong = "Chờ duyệt";
+                await room.save();
             }
     
             // Xóa phí đặt cọc

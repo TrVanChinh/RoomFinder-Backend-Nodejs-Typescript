@@ -27,6 +27,8 @@ export default class UsersRoute implements Route {
 
     this.router.post(this.path + '/addUser', this.usersController.addUser);
 
+    this.router.post(this.path  + '/forgotPassword/email', this.usersController.forgotPassword);
+
     this.router.put(
       this.path + '/:id',
       this.usersController.userUpdateByAdmin);
@@ -41,6 +43,8 @@ export default class UsersRoute implements Route {
     
     this.router.get(this.path + '/role/paging/:page', this.usersController.getAllPaginationByRole);
 
+    this.router.get(this.path + '/register/paging/:page', this.usersController.getRegisterDataAllPaging);
+
     this.router.delete(this.path + '/:id', this.usersController.deleteUser);
     
     this.router.delete(this.path, this.usersController.deleteUsers);
@@ -52,6 +56,8 @@ export default class UsersRoute implements Route {
 
     this.router.put(this.path  + '/update/user', this.usersController.userUpdateByUser);
     this.router.put(this.path  + '/updatePassword/:id', this.usersController.updatePassword);
+    this.router.put(this.path  + '/account/roomOwner/approve/:id', this.usersController.ApproveTheRoomOwner);
+    this.router.put(this.path  + '/account/roomOwner/reject/:id', this.usersController.RejectTheRoomOwner);
     this.router.post(this.path  + '/payment/zalopay', this.usersController.payment);
     this.router.post(this.path  + '/payment/checkPayment', this.usersController.checkPayment);
     this.router.post(this.path  + '/report', this.usersController.addReport);

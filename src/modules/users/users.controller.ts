@@ -131,6 +131,17 @@ export default class UsersController {
     }
   };
 
+  public getRegisterDataAllPaging = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const page = Number(req.params.page);
+
+      const paginationResult = await this.userService.getRegisterDataAll(page);
+      res.status(200).json(paginationResult);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public updatePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const data: { oldPassword: string, newPassword: string} = req.body;
@@ -146,6 +157,24 @@ export default class UsersController {
     try {
       const model: userUpdateByAdmin = req.body;
       const user = await this.userService.userUpdateByAdmin(req.params.id, model);
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public ApproveTheRoomOwner = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.ApproveTheRoomOwner(req.params.id);
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public RejectTheRoomOwner = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.RejectTheRoomOwner(req.params.id);
       res.status(200).json(user);
     } catch (error) {
       next(error);
@@ -260,6 +289,17 @@ export default class UsersController {
       });
     }
   };
+
+  public forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const email: string = req.body.email;
+      const result = await this.userService.forgotPassword(email);
+      res.status(200).json({message: "Mật khẩu mới đã được gửi qua email của bạn."});
+    } catch (error) {
+      next(error);
+    }
+  };
+
 
   public payment = async (req: Request, res: Response): Promise<void> => { 
     const { totalPrice } = req.body;

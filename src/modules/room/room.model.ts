@@ -20,10 +20,12 @@ class Room extends Model<IRoom, RoomCreationAttributes> implements IRoom {
   public giaPhong!: number;
   public giaDien!: number;
   public giaNuoc!: number;
-  public dienTich!: string;
+  public dienTich!: number;
   public phongChungChu!: boolean;
   public nhaBep!: boolean;
   public gacXep!: boolean;
+  public nhaDeXe!: boolean;
+  public nhaVeSinh!: string;
   public soLuongPhongNgu!: number;
   public soTang!: number;
   public soNguoiToiDa!: number;
@@ -80,7 +82,7 @@ Room.init(
         allowNull: false,
       },
       dienTich: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       phongChungChu: {
@@ -95,7 +97,14 @@ Room.init(
         type: DataTypes.BOOLEAN,
         allowNull: false,
       },
-     
+      nhaVeSinh: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      nhaDeXe: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+      },
       soLuongPhongNgu: {
         type: DataTypes.INTEGER,
         allowNull: false,

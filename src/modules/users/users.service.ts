@@ -124,13 +124,22 @@ class UserService {
         if (isEmptyObject(model)) {
           throw new HttpException(400, 'Không để trống');
         }
-        const checkEmailExist = await User.findOne({
+        const existingUser = await User.findOne({
           where: {
             email: model.email,
-          }
+          },
         });
-        if (checkEmailExist) {
-          throw new HttpException(400, 'Email đã tồn tại.');
+      
+        if (existingUser) {
+          if (existingUser.trangThaiDangKy ==='Không duyệt') {
+            await User.destroy({
+              where: {
+                email: model.email,
+              },
+            });
+          } else {
+            throw new HttpException(400, 'Email đã tồn tại.');
+          }
         }
         const hashedPassword = await bcrypt.hash(model.matKhau, 10);
         // Tạo người dùng mới bằng Sequelize
@@ -173,15 +182,23 @@ class UserService {
             throw new HttpException(400, 'Email không hợp lệ.');
         }
 
-          const checkEmailExist = await User.findOne({
-            where: {
-              email: model.email,
-            },
-          });
+        const existingUser = await User.findOne({
+          where: {
+            email: model.email,
+          },
+        });
       
-          if (checkEmailExist) {
+        if (existingUser) {
+          if (existingUser.trangThaiDangKy ==='Không duyệt') {
+            await User.destroy({
+              where: {
+                email: model.email,
+              },
+            });
+          } else {
             throw new HttpException(400, 'Email đã tồn tại.');
           }
+        }
 
           const checkSDTExist = await User.findOne({
             where: {
@@ -231,9 +248,9 @@ class UserService {
       
           // Tùy chọn gửi email
           const mailOptions = {
-            from: process.env.AUTH_EMAIL,
+            from: `"Tìm phòng tại Đà Nẵng" <${process.env.AUTH_EMAIL}>`,
             to: email,
-            subject: 'Xác minh OTP',
+            subject: 'Xác minh OTP tạo tài khoản',
             html: `<p>Mã OTP của bạn: <b>${otp}</b></p>`,
           };
       
@@ -351,6 +368,44 @@ class UserService {
         }
       }
         
+      public async ApproveTheRoomOwner(userId: string): Promise<User> {
+        const user = await User.findByPk(userId);
+        if (!user) {
+          throw new HttpException(400, 'Người dùng này không tồn tại.');
+        }
+
+        let updateData: Partial<User> = {};
+
+        updateData.trangThaiTaiKhoan = "Đang hoạt động";
+        updateData.trangThaiDangKy = "Đã duyệt";
+        await user.update(updateData);
+        return user;
+      }
+
+      public async RejectTheRoomOwner(userId: string): Promise<User> {
+        const user = await User.findByPk(userId);
+        if (!user) {
+          throw new HttpException(400, 'Người dùng này không tồn tại.');
+        }
+
+        let updateData: Partial<User> = {};
+
+        updateData.trangThaiTaiKhoan = "Chưa hoạt động";
+        updateData.trangThaiDangKy = "Không duyệt";
+        // Cập nhật thông tin người dùng
+        await user.update(updateData);
+        const mailOptions = {
+          from: `"Tìm phòng tại Đà Nẵng" <${process.env.AUTH_EMAIL}>`,
+          to: user.email,
+          subject: 'Đăng ký tài khoản chủ phòng không thành công',
+          html: `<p>Thông tin đăng ký của bạn chưa hợp lệ</p>
+                 <p>Hãy đăng ký lại với thông tin chính xác để có thể sử dụng dịch vụ của chúng tôi.</p>
+          `,
+        };
+        await transporter.sendMail(mailOptions);
+        return user;
+      }
+
 
       public async userUpdateByAdmin(userId: string, model: userUpdateByAdmin): Promise<User> {
         if (isEmptyObject(model)) {
@@ -549,12 +604,13 @@ class UserService {
         }
         : {};
       }
-      
+       
       // Lấy danh sách người dùng với phân trang
       const { rows: users, count: rowCount } = await User.findAndCountAll({
           where: whereCondition,
           offset: (page - 1) * pageSize,
           limit: pageSize,
+          order: [['ngayDangKy', 'DESC']],
       });
   
       return {
@@ -594,6 +650,30 @@ class UserService {
     } as IPagination<IUser>;
 }
 
+  public async getRegisterDataAll(page: number): Promise<IPagination<IUser>> {
+    const pageSize: number = Number(process.env.PAGE_SIZE || 10);
+    // Tạo điều kiện tìm kiếm
+    let whereCondition: any = {
+      trangThaiDangKy: "Chưa duyệt",
+      maLTK: 3,
+    };
+    
+    // Lấy danh sách người dùng với phân trang
+    const { rows: users, count: rowCount } = await User.findAndCountAll({
+        where: whereCondition,
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: [['ngayDangKy', 'DESC']],
+    });
+
+    return {
+        total: rowCount,
+        page: page,
+        pageSize: pageSize,
+        items: users,
+    } as IPagination<IUser>;
+  }
+
   public updateUserCCCD = async (userId: number, frontUrl: string, backUrl: string) => {
     return await User.update(
       { matTruocCCCD: frontUrl, matSauCCCD: backUrl },
@@ -621,6 +701,53 @@ class UserService {
     }
 }
 
+public async sendPasswordEmail(email: string, password: string) {
+  try {
+    const mailOptions = {
+      from: `"Tìm phòng tại Đà Nẵng" <${process.env.AUTH_EMAIL}>`,
+      to: email,
+      subject: 'Mật khẩu mới đã được thiết lập lại cho bạn',
+      html: `<p>Mật khẩu của bạn: <b>${password}</b></p>
+             <p>Hãy cập nhật lại mật khẩu của bạn sau khi đăng nhập.</p>
+      `,
+    };
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+    throw new HttpException(500, 'Lỗi khi gửi OTP');
+  }
+}
+  public async forgotPassword(email: string) { 
+    if (!email) {
+      throw new HttpException(404, 'Không có email được gửi đến.');
+  }
+    try {
+      const user = await User.findOne({ 
+        where: {
+          email: email,
+        } 
+      });
+      if (!user) {
+        throw new HttpException(404, 'Email này không tồn tại.');
+      }
+      const password = "12345678"
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await User.update(
+        { matKhau: hashedPassword },
+        { where: { maNguoiDung: user.maNguoiDung } }
+      );
+      await this.sendPasswordEmail(email,password)
+
+    } catch (error) {
+      console.error(error);
+        if (error instanceof HttpException) {
+            throw error;
+        }
+        throw new HttpException(500, 'Lỗi quên mật khẩu.');
+    }
+  }
   
 
   

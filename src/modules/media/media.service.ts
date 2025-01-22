@@ -11,6 +11,7 @@ import { IPagination } from '../../core/interfaces';
 import { IsEmail, IsNotEmpty, validate } from 'class-validator';
 import User from '../users/users.model';
 import { uploadToCloudinary } from '../../config/cloudinary';
+import Room from '../room/room.model';
 
 const nodemailer = require('nodemailer')
 

@@ -25,6 +25,11 @@ import Bill from '../bill/bill.model';
 import Notification from '../notification/notification.model';
 import { Server } from "socket.io";
 import { SaveRoomSchema } from '../save_room';
+import NotificationService from '../notification/notification.service';
+import { INotification } from '../notification';
+import { IBill } from '../bill';
+import Report from '../report/report.model';
+import { UserSchema } from '../users';
 
 class RoomService {
     static getRoomInfo: any; 
@@ -60,6 +65,8 @@ class RoomService {
             phongChungChu: data.phongChungChu,
             gacXep: data.gacXep,
             nhaBep: data.nhaBep,
+            nhaDeXe: data.nhaDeXe,
+            nhaVeSinh: data.nhaVeSinh,            
             soLuongPhongNgu: data.soLuongPhongNgu,
             soTang:data.soTang,
             soNguoiToiDa: data.soNguoiToiDa,
@@ -130,6 +137,8 @@ class RoomService {
                 phongChungChu: roomData.phongChungChu,
                 gacXep: roomData.gacXep,
                 nhaBep: roomData.nhaBep,
+                nhaDeXe: roomData.nhaDeXe,
+                nhaVeSinh: roomData.nhaVeSinh,                
                 soLuongPhongNgu: roomData.soLuongPhongNgu,
                 soTang: roomData.soTang,
                 soNguoiToiDa: roomData.soNguoiToiDa,
@@ -150,9 +159,96 @@ class RoomService {
     public async getInformationActiveRooms(): Promise<RoomInfo[]> {
       try {
         // Lấy danh sách tất cả các phòng với trạng thái khác "Chờ duyệt"
+        // const roomsData = await Room.findAll({
+        //   where: {
+        //     trangThaiPhong: { [Op.ne]: 'Chờ duyệt' }, // Loại bỏ các phòng có trạng thái "Chờ duyệt"
+        //   },
+        //   include: [
+        //     { model: User, as: 'NguoiDung' },
+        //     { model: Address, as: 'DiaChi' },
+        //     { model: RoomType, as: 'LoaiPhong' },
+        //     { model: Interior, as: 'NoiThat' },
+        //     { model: Deposit, as: 'ChiPhiDatCoc' },
+        //     { model: Media, as: 'HinhAnh' },
+        //   ],
+        // });
+        const roomsData = await Room.findAll({
+          include: [
+            { model: User, as: 'NguoiDung' },
+            { model: Address, as: 'DiaChi' },
+            { model: RoomType, as: 'LoaiPhong' },
+            { model: Interior, as: 'NoiThat' },
+            { model: Deposit, as: 'ChiPhiDatCoc' },
+            { model: Media, as: 'HinhAnh' },
+          ],
+        });
+    
+        if (!roomsData || roomsData.length === 0) {
+          throw new HttpException(404, 'Không tìm thấy phòng nào đã được duyệt.');
+        }
+    
+        const mediaCategory = await MediaCategory.findAll();
+    
+        // Xử lý thông tin từng phòng để trả về danh sách RoomInfo
+        const roomInfos: RoomInfo[] = roomsData.map((roomData) => {
+          const media: Media[] = roomData.get('HinhAnh') as Media[];
+          const mediaFormat: MediaFormat[] = [];
+    
+          media.forEach((item) => {
+            mediaCategory.forEach((mediaItem) => {
+              if (item.maDanhMucHinhAnh === mediaItem.maDanhMucHinhAnh) {
+                mediaFormat.push({
+                  maHinhAnh: item.maHinhAnh,
+                  danhMucHinhAnh: mediaItem.tenDanhMuc,
+                  loaiTep: item.loaiTep,
+                  duongDan: item.duongDan,
+                });
+              }
+            });
+          });
+    
+          return {
+            maPhong: roomData.maPhong,
+            nguoiDung: roomData.get('NguoiDung') as IUser,
+            loaiPhong: roomData.get('LoaiPhong') as IRoomType,
+            diaChi: roomData.get('DiaChi') as IAddress,
+            noiThat: roomData.get('NoiThat') as IInterior,
+            tieuDe: roomData.tieuDe,
+            chiPhiDatCoc: roomData.get('ChiPhiDatCoc') as IDeposit[],
+            hinhAnh: mediaFormat,
+            moTa: roomData.moTa,
+            giaPhong: roomData.giaPhong,
+            giaDien: roomData.giaDien,
+            giaNuoc: roomData.giaNuoc,
+            dienTich: roomData.dienTich,
+            phongChungChu: roomData.phongChungChu,
+            gacXep: roomData.gacXep,
+            nhaBep: roomData.nhaBep,
+            nhaDeXe: roomData.nhaDeXe,
+            nhaVeSinh: roomData.nhaVeSinh,
+            soLuongPhongNgu: roomData.soLuongPhongNgu,
+            soTang: roomData.soTang,
+            soNguoiToiDa: roomData.soNguoiToiDa,
+            trangThaiPhong: roomData.trangThaiPhong,
+          };
+        });
+    
+        return roomInfos;
+      } catch (error) {
+        console.log(error);
+        if (error instanceof HttpException) {
+          throw error;
+        }
+        throw new HttpException(500, 'Lỗi lấy dữ liệu phòng.');
+      }
+    }
+
+    public async getInformationRoomsRegister(): Promise<RoomInfo[]> {
+      try {
+        // Lấy danh sách tất cả các phòng với trạng thái khác "Chờ duyệt"
         const roomsData = await Room.findAll({
           where: {
-            trangThaiPhong: { [Op.ne]: 'Chờ duyệt' }, // Loại bỏ các phòng có trạng thái "Chờ duyệt"
+            trangThaiPhong: 'Chờ duyệt' , 
           },
           include: [
             { model: User, as: 'NguoiDung' },
@@ -205,6 +301,8 @@ class RoomService {
             phongChungChu: roomData.phongChungChu,
             gacXep: roomData.gacXep,
             nhaBep: roomData.nhaBep,
+            nhaDeXe: roomData.nhaDeXe,
+            nhaVeSinh: roomData.nhaVeSinh,
             soLuongPhongNgu: roomData.soLuongPhongNgu,
             soTang: roomData.soTang,
             soNguoiToiDa: roomData.soNguoiToiDa,
@@ -221,8 +319,33 @@ class RoomService {
         throw new HttpException(500, 'Lỗi lấy dữ liệu phòng.');
       }
     }
+
+    public async getRoomSaveOfUser(userId: string): Promise<RoomInfo[]> {
+      if (!userId) {
+        throw new HttpException(404, 'Không có dữ liệu mã người dùng được gửi đến.');
+      }
+      try {
+        const listRoomSave = await SaveRoomSchema.findAll({
+          where: {
+            maNguoiDung: userId, 
+          },
+        })
+        if (!listRoomSave || listRoomSave.length === 0) {
+          return []
+        }
+        const roomIds = listRoomSave.map(item => item.maPhong);
+        const listRoomInfo = await Promise.all(
+          roomIds.map(async (roomId) => {
+            return this.getRoomInfo(roomId.toString());
+          })
+        );
     
-  
+        return listRoomInfo;
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách phòng đã lưu:", error);
+        throw new HttpException(500, 'Lỗi khi lấy danh sách phòng đã lưu.');
+      }
+    }
 
     public async getRoomOfUser(userId: string): Promise<RoomInfo[]> { 
         if (!userId) {
@@ -284,6 +407,8 @@ class RoomService {
                     phongChungChu: room.phongChungChu,
                     gacXep: room.gacXep,
                     nhaBep: room.nhaBep,
+                    nhaDeXe: room.nhaDeXe,
+                    nhaVeSinh: room.nhaVeSinh,
                     soLuongPhongNgu: room.soLuongPhongNgu,
                     soTang: room.soTang,
                     soNguoiToiDa: room.soNguoiToiDa,
@@ -301,87 +426,56 @@ class RoomService {
        }
     }
 
-    // public async getRoomOfDistrict(district: string): Promise<RoomInfo[]> { 
-    //     if (!district) {
-    //         throw new HttpException(404, 'Không có dữ liệu quận gửi đến.');
-    //     }
-    //    try {
-    //     const roomsWithDistrict = await Room.findAll({
-    //         include: [
-    //             {
-    //                 model: Address,
-    //                 as: 'DiaChi', 
-    //                 where: {
-    //                     quanHuyen: {
-    //                         [Op.iLike]: `%${district}%`,
-    //                     },
-    //                 },
-    //             },
-    //             { model: User, as: 'NguoiDung' },         
-    //             { model: RoomType, as: 'LoaiPhong' },     
-    //             { model: Interior, as: 'NoiThat' },
-    //             { model: Deposit, as: 'ChiPhiDatCoc' },   
-    //             { model: Media, as: 'HinhAnh' },
-    //         ],
-    //     });
-    //         const roomDataFotmat: RoomInfo[] = []
-
-    //         if (!roomsWithDistrict || roomsWithDistrict.length === 0) {
-    //             return roomDataFotmat
-    //         }
-
-    //         const mediaCategory = await MediaCategory.findAll()
-
-
-    //         roomsWithDistrict.forEach(room => {
-    //             const media: Media[] = room.get('HinhAnh') as Media[]; 
-    //             const mediaFormat: MediaFormat[] = []
-    //             media.forEach(item => {
-    //                 mediaCategory.forEach( mediaItem => {
-    //                     if (item.maDanhMucHinhAnh === mediaItem.maDanhMucHinhAnh) {
-    //                         mediaFormat.push({
-    //                             maHinhAnh: item.maHinhAnh,
-    //                             danhMucHinhAnh: mediaItem.tenDanhMuc,
-    //                             loaiTep: item.loaiTep,
-    //                             duongDan: item.duongDan,
-    //                         })
-    //                     }
-    //                 })
-    //             })
-
-    //             roomDataFotmat.push({
-    //                 maPhong: room.maPhong,
-    //                 nguoiDung: room.get('NguoiDung') as IUser, 
-    //                 loaiPhong: room.get('LoaiPhong') as IRoomType,
-    //                 diaChi: room.get('DiaChi') as IAddress,
-    //                 noiThat:  room.get('NoiThat') as IInterior,
-    //                 tieuDe: room.tieuDe,
-    //                 chiPhiDatCoc: room.get('ChiPhiDatCoc') as IDeposit[], 
-    //                 hinhAnh: mediaFormat , 
-    //                 moTa: room.moTa,
-    //                 giaPhong: room.giaPhong,
-    //                 giaDien: room.giaDien,
-    //                 giaNuoc: room.giaNuoc,
-    //                 dienTich: room.dienTich,
-    //                 phongChungChu: room.phongChungChu,
-    //                 gacXep: room.gacXep,
-    //                 nhaBep: room.nhaBep,
-    //                 soLuongPhongNgu: room.soLuongPhongNgu,
-    //                 soTang: room.soTang,
-    //                 soNguoiToiDa: room.soNguoiToiDa,
-    //                 trangThaiPhong: room.trangThaiPhong,
-    //             });
-    //         })
-
-    //         return roomDataFotmat
-    //    } catch (error) {
-    //         console.log(error)
-    //         if (error instanceof HttpException) {
-    //             throw error;
-    //         }
-    //             throw new HttpException(500, 'Lỗi lấy dữ liệu phòng theo quân huyện.');
-    //    }
-    // }
+    public async getReportedRooms(page: number): Promise<IPagination<{ room: RoomInfo; userName: string; reason: string }>> {
+      const pageSize: number = Number(process.env.PAGE_SIZE || 10);
+      try {
+        // Lấy danh sách tất cả các báo cáo
+        const reportRooms = await Report.findAll();
+        if (!reportRooms || reportRooms.length === 0) {
+          return {
+            total: 0,
+            page,
+            pageSize,
+            items: [],
+          };
+        }
+    
+        // Tạo danh sách phòng bị báo cáo
+        const reportedRoomInfos = await Promise.all(
+          reportRooms.map(async (report) => {
+            const roomInfo = await this.getRoomInfo(report.maPhong.toString());
+            const nguoiDung = await UserSchema.findByPk(report.maNguoiDung);
+            if (nguoiDung?.tenNguoiDung) {
+              return {
+                room: roomInfo,
+                userName: nguoiDung.tenNguoiDung,
+                reason: report.noiDungBaoCao,
+              };
+            }
+            return null;
+          })
+        );
+    
+        // Lọc bỏ các giá trị null (phòng không hợp lệ hoặc người dùng không tồn tại)
+        const validReportedRoomInfos = reportedRoomInfos.filter(Boolean) as { room: RoomInfo; userName: string; reason: string }[];
+    
+        // Phân trang
+        const total = validReportedRoomInfos.length;
+        const offset = (page - 1) * pageSize;
+        const paginatedRooms = validReportedRoomInfos.slice(offset, offset + pageSize);
+    
+        return {
+          total,
+          page,
+          pageSize,
+          items: paginatedRooms,
+        };
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách phòng bị báo cáo:", error);
+        throw new HttpException(500, "Lỗi khi lấy danh sách phòng bị báo cáo.");
+      }
+    }
+    
     public async getRoomOfDistrict(district: string): Promise<RoomInfo[]> { 
         if (!district) {
             throw new HttpException(404, 'Không có dữ liệu quận gửi đến.');
@@ -450,6 +544,8 @@ class RoomService {
                     phongChungChu: room.phongChungChu,
                     gacXep: room.gacXep,
                     nhaBep: room.nhaBep,
+                    nhaDeXe: room.nhaDeXe,
+                    nhaVeSinh: room.nhaVeSinh,
                     soLuongPhongNgu: room.soLuongPhongNgu,
                     soTang: room.soTang,
                     soNguoiToiDa: room.soNguoiToiDa,
@@ -473,7 +569,6 @@ class RoomService {
         // Lấy danh sách tất cả các phòng đã duyệt
         const allRooms = await this.getInformationActiveRooms();
     
-        // Lọc danh sách theo từ khóa nếu có
         const filteredRooms = keyword
           ? allRooms.filter(
               (room) =>
@@ -508,25 +603,28 @@ class RoomService {
     
   
     // Lấy danh sách Room theo RoomType với phân trang
-    public async getAllRoomsByType(maLoaiPhong: number, page: number): Promise<IPagination<RoomInfo>> {
+    public async getAllRoomsByType(maLoaiPhong: number, trangThaiPhong: string, page: number): Promise<IPagination<RoomInfo>> {
       const pageSize: number = Number(process.env.PAGE_SIZE || 10);
       try {
-        // Lấy danh sách tất cả các phòng đã duyệt
         const allRooms = await this.getInformationActiveRooms();
-    
-        // Lọc danh sách theo loại phòng
-        const filteredRooms = allRooms.filter(
-          (room) => room.loaiPhong.maLoaiPhong === maLoaiPhong
-        );
-    
-        // Tính toán số lượng trang
+        let filteredRooms: RoomInfo[] = [];
+        if(maLoaiPhong!==0 && trangThaiPhong) {
+          filteredRooms = allRooms.filter(
+            (room) => room.loaiPhong.maLoaiPhong === maLoaiPhong && room.trangThaiPhong === trangThaiPhong
+          );
+        } else if (maLoaiPhong!==0) {
+          filteredRooms = allRooms.filter((room) => room.loaiPhong.maLoaiPhong === maLoaiPhong);
+        } else if (trangThaiPhong) {
+          filteredRooms = allRooms.filter((room) => room.trangThaiPhong === trangThaiPhong);
+        } else {
+          filteredRooms = allRooms;
+        }
+
         const total = filteredRooms.length;
         const offset = (page - 1) * pageSize;
     
-        // Phân trang danh sách
         const paginatedRooms = filteredRooms.slice(offset, offset + pageSize);
     
-        // Trả về kết quả dạng phân trang
         return {
           total,
           page,
@@ -542,7 +640,108 @@ class RoomService {
       }
     }
     
+    public async revenueStatistics(userId: string ): Promise<{
+      total: number;
+      Bill: {
+        timeline: string;
+        totalMoneyOfTimeline: number;
+        BillList: {
+          maHoaDon: number;
+          maLoaiHoaDon: number;
+          phong: RoomInfo;
+          maNguoiDung: number;
+          tongSoTien: number;
+          ngayBatDau: Date;
+          ngayKetThuc: Date;
+          thoiGianTao: Date;
+        }[];
+      }[];
+    }> {
+      if (!userId) {
+        throw new HttpException(404, 'Không có dữ liệu người dùng được gửi đến.');
+      }
+      try {
+        const bills: IBill[] = await Bill.findAll({  
+          where: {
+            maLoaiHoaDon: 1, 
+          },         
+          include: [
+            {
+              model: Room,
+              as: 'Phong', 
+              where: {
+                maNguoiDung: userId,
+              },
+            },
+          ],
+        });
+
+        if (!bills || bills.length === 0) {
+          return {
+            total: 0,
+            Bill: [],
+          };
+        }
+
+        const total = bills.reduce((sum, bill) => sum + bill.tongSoTien, 0);
+
+        // Nhóm hóa đơn theo timeline
+       const groupedBills = bills.reduce<{ [key: string]: IBill[] }>((acc, bill) => {
+          const timeline = `${bill.thoiGianTao.getMonth() + 1}/${bill.thoiGianTao.getFullYear()}`;
+          if (!acc[timeline]) {
+            acc[timeline] = [];
+          }
+          acc[timeline].push(bill);
+          return acc;
+        }, {});
+
+        // Sắp xếp danh sách hóa đơn từ ngày cũ nhất đến mới nhất
+        Object.keys(groupedBills).forEach(timeline => {
+          groupedBills[timeline].sort((a, b) => a.thoiGianTao.getTime() - b.thoiGianTao.getTime());
+        });
+
+        // Biến đổi dữ liệu thành cấu trúc yêu cầu
+        const result = await Promise.all(
+          Object.keys(groupedBills).map(async timeline => {
+            let totalMoneyOfTimeline = 0
+            const BillList = await Promise.all(
+              groupedBills[timeline].map(async bill => {
+                const roomInfo = await this.getRoomInfo(String(bill.maPhong));
+                totalMoneyOfTimeline = totalMoneyOfTimeline + bill.tongSoTien
+                return {
+                  maHoaDon: bill.maHoaDon,
+                  maLoaiHoaDon: bill.maLoaiHoaDon,
+                  phong: roomInfo,
+                  maNguoiDung: bill.maNguoiDung,
+                  tongSoTien: bill.tongSoTien,
+                  ngayBatDau: bill.ngayBatDau,
+                  ngayKetThuc: bill.ngayKetThuc,
+                  thoiGianTao: bill.thoiGianTao,
+                };
+              })
+            );
   
+            return {
+              timeline,
+              BillList,
+              totalMoneyOfTimeline: totalMoneyOfTimeline
+            };
+          })
+        );
+
+        return {
+          total,
+          Bill: result,
+        };
+
+      } catch (error) {
+        console.log(error)
+        if (error instanceof HttpException) {
+            throw error;
+        }
+          throw new HttpException(500, 'Lỗi Thống kê doanh thu.');
+      }
+    }
 
     public async updateRoom(roomId: string, roomData: RoomInfo) {
         
@@ -593,6 +792,105 @@ class RoomService {
         }
     }
 
+    public async addNotification( data: INotification){
+      if (!data) {
+          throw new HttpException(404, 'Không có dữ liệu hóa đơn được gửi đến.');
+      }
+      try {
+  
+          const thoiGian = new Date()
+          const thoiGianUTC7 = new Date(thoiGian.getTime() + 7 * 60 * 60 * 1000);
+          console.log('thoi gian UTC+7:', thoiGianUTC7);
+          
+          const notification  = await Notification.create({
+              maLoaiThongBao: data.maLoaiThongBao,
+              maNguoiDung: data.maNguoiDung,
+              maPhong: data.maPhong,
+              maHoaDon: data.maHoaDon,
+              noiDungThongBao: data.noiDungThongBao,
+              trangThai: data.trangThai,
+              thoiGian: thoiGianUTC7,
+          }); 
+          // this.io.emit("new-notification", {
+          //     message: "A new notification has arrived!"
+          // });
+              return notification ;
+      } catch (error) {
+          console.log(error)
+          if (error instanceof HttpException) {
+              throw error;
+          }
+          throw new HttpException(500, 'Lỗi tạo thông báo.');
+      
+      }
+  
+    }
+    public async approveRoom(maPhong: string ) {
+      if (!maPhong) {
+          throw new HttpException(400, 'Mã phòng không hợp lệ.');
+      }
+      try {
+          const room = await Room.findByPk(maPhong);
+          if (!room) {
+              throw new HttpException(404, 'Phòng không tồn tại.');
+          }
+          room.trangThaiPhong = "Cho thuê";
+          const result = await room.save();
+          const notifiContent: INotification = {
+              maThongBao: 1,
+              maLoaiThongBao: 4,
+              maNguoiDung: room.maNguoiDung,
+              maPhong: room.maPhong,
+              maHoaDon: null,
+              noiDungThongBao: "",
+              trangThai: "Chưa xem",
+              thoiGian: new Date(),
+            };
+          
+          await this.addNotification(notifiContent)
+          return result
+      } catch (error) { 
+          console.log(error)
+          if (error instanceof HttpException) {
+              throw error;
+          }
+              throw new HttpException(500, 'Lỗi cập nhật trang thái phòng.');
+      }
+    }
+
+  public async rejectRoom(maPhong: string, lyDo: string ) {
+    if (!maPhong) {
+      throw new HttpException(400, 'Mã phòng không hợp lệ.');
+    }
+    try {
+        const room = await Room.findByPk(maPhong);
+        if (!room) {
+            throw new HttpException(404, 'Phòng không tồn tại.');
+        }
+        room.trangThaiPhong = "Không duyệt";
+        const result = await room.save();
+        const notifiContent: INotification = {
+            maThongBao: 1,
+            maLoaiThongBao: 5,
+            maNguoiDung: room.maNguoiDung,
+            maPhong: room.maPhong,
+            maHoaDon: null,
+            noiDungThongBao: lyDo,
+            trangThai: "Chưa xem",
+            thoiGian: new Date(),
+          };
+        
+        await this.addNotification(notifiContent)
+        return result
+      } catch (error) { 
+        console.log(error)
+        if (error instanceof HttpException) {
+            throw error;
+        }
+            throw new HttpException(500, 'Lỗi cập nhật trang thái phòng.');
+    }
+}
+
     public async updateBasicRoomInfo(roomData: IRoom) {
         if (!roomData) {
             throw new HttpException(400, 'Không có dữ liệu cập nhật.');
@@ -613,11 +911,17 @@ class RoomService {
             room.phongChungChu = roomData.phongChungChu;
             room.gacXep = roomData.gacXep;
             room.nhaBep = roomData.nhaBep;
+            room.nhaDeXe = roomData.nhaDeXe;
+            room.nhaVeSinh = roomData.nhaVeSinh;
             room.soLuongPhongNgu = roomData.soLuongPhongNgu;
             room.soTang = roomData.soTang;
             room.soNguoiToiDa = roomData.soNguoiToiDa;
-
+            
+            if (roomData.trangThaiPhong === "Không duyệt") {
+              room.trangThaiPhong = "Chờ duyệt";
+            }
             await room.save();
+            
         } catch (error) { 
             console.log(error)
             if (error instanceof HttpException) {
@@ -627,7 +931,7 @@ class RoomService {
         }
     }
 
-    public async saveRoom(maPhong: number, maNguoiDung: number) { 
+    public async saveRoom(maPhong: number, maNguoiDung: number) {
       try {
         const existingSaveRoom = await SaveRoomSchema.findOne({
           where: {
@@ -886,6 +1190,8 @@ class RoomService {
               phongChungChu: room.phongChungChu,
               gacXep: room.gacXep,
               nhaBep: room.nhaBep,
+              nhaDeXe: room.nhaDeXe,
+              nhaVeSinh: room.nhaVeSinh,
               soLuongPhongNgu: room.soLuongPhongNgu,
               soTang: room.soTang,
               soNguoiToiDa: room.soNguoiToiDa,
@@ -975,14 +1281,8 @@ class RoomService {
         try {
             const thoiGian = new Date()
             const currentDate = new Date(); 
-            // const startTime = currentDate.toLocaleDateString('en-CA');
-            // const thoiGianUTC7 = new Date(thoiGian.getTime() + 13 * 60 * 60 * 1000);
             const startDate = currentDate.toLocaleDateString('en-CA');
             const startTime = currentDate.toLocaleTimeString('en-CA');
-
-            // console.log('thoi gian UTC+7:', thoiGianUTC7);
-        
-            // console.log('Ngày tháng năm (kiểu Date):', startDate , startTime);
 
             const today = new Date();
             // today.setHours(0, 0, 0, 0);

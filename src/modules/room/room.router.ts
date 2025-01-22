@@ -41,7 +41,15 @@ export default class RoomRoute implements Route {
     this.router.get(
       this.path + '/user/:id',
       this.RoomController.getRoomOfUser);
-    
+
+    this.router.get(
+      this.path + '/saveroom/user/:id',
+      this.RoomController.getRoomSaveOfUser);
+
+    this.router.get(
+      this.path + '/reportroom/:page',
+      this.RoomController.getReportedRooms);
+
     this.router.get(
       this.path + '/address/district',
       this.RoomController.getRoomOfDistrict);
@@ -51,8 +59,16 @@ export default class RoomRoute implements Route {
       this.RoomController.getAllRoomsPaging);
   
     this.router.get(
+      this.path + '/revenueStatistics/user/:id',
+      this.RoomController.revenueStatistics);
+
+    this.router.post(
       this.path + '/type/paging/:page',
       this.RoomController.getAllRoomsByType);
+  
+    this.router.get(
+      this.path + '/register/paging',
+      this.RoomController.getAllRoomsRegister);
 
     this.router.post(
       this.path + '/addNew',
@@ -75,9 +91,16 @@ export default class RoomRoute implements Route {
       this.RoomController.updateRoomStatus);
 
     this.router.put(
+      this.path + '/approveRoom/:id',
+      this.RoomController.approveRoom);
+
+    this.router.put(
+      this.path + '/rejectRoom/:id',
+      this.RoomController.rejectRoom);
+
+    this.router.put(
       this.path + '/updateBasicRoomInfo',
       this.RoomController.updateBasicRoomInfo);
-
 
     this.router.get(
       this.path + '/check/billdeadline',

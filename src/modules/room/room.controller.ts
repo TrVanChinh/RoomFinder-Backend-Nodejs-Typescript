@@ -114,6 +114,25 @@ export default class AddressController {
     }
   }
 
+  public getRoomSaveOfUser = async (req: Request, res: Response, next: NextFunction) => { 
+    try {
+      const room = await this.RoomService.getRoomSaveOfUser(req.params.id);
+      res.status(200).json(room);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public getReportedRooms = async (req: Request, res: Response, next: NextFunction) => { 
+    try {
+      const page = Number(req.params.page);
+      const listReportRoomInfo = await this.RoomService.getReportedRooms(page);
+      res.status(200).json(listReportRoomInfo);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public getRoomOfDistrict = async (req: Request, res: Response, next: NextFunction) => { 
     try {
       const district = req.query.district as string;
@@ -138,9 +157,21 @@ export default class AddressController {
   public getAllRoomsByType = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const page = Number(req.params.page);
-      const keyword = Number(req.query.keyword) || 0;
+      const roomTypeId = Number(req.body.maLoaiPhong) || 0;
+      const roomStatus: string = req.body.trangThaiPhong || '';
+      const paginationResult = await this.RoomService.getAllRoomsByType(roomTypeId, roomStatus, page);
+      res.status(200).json(paginationResult);
+    } catch (error) {
+      next(error);
+    }
+  };
 
-      const paginationResult = await this.RoomService.getAllRoomsByType(keyword, page);
+  public getAllRoomsRegister = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // const page = Number(req.params.page);
+      // const keyword = Number(req.query.keyword) || 0;
+
+      const paginationResult = await this.RoomService.getInformationRoomsRegister();
       res.status(200).json(paginationResult);
     } catch (error) {
       next(error);
@@ -164,6 +195,27 @@ export default class AddressController {
         const data = await this.RoomService.updateRoomStatus(maPhong, trangThaiPhong);
         res.status(200).json(data);
 
+    } catch (error) {
+        next(error);
+    }
+  };
+
+  public approveRoom = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const  maPhong  = req.params.id; 
+        const data = await this.RoomService.approveRoom(maPhong);
+        res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
+  };
+
+  public rejectRoom = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const  maPhong  = req.params.id; 
+        const lyDo: string = req.body.lyDo
+        const data = await this.RoomService.rejectRoom(maPhong, lyDo);
+        res.status(200).json(data);
     } catch (error) {
         next(error);
     }
@@ -222,5 +274,15 @@ export default class AddressController {
     }
   };
 
+  public revenueStatistics = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = await this.RoomService.revenueStatistics(req.params.id);
+        res.status(200).json(data);
+    } catch (error) {
+        next(error);
+    }
+  };
+
 }
+
 

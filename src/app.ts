@@ -149,7 +149,7 @@ class App {
         const roomService = new RoomService(this.io);
 
         const job = new CronJob(
-            "13 15 * * *", // Thời gian chạy cron job
+            "48 2 * * *", // Thời gian chạy cron job
             async () => {
                 console.log("Đang kiểm tra hóa đơn hết hạn...");
                 try {
